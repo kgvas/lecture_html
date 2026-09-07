@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Опитування · Лекція</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFAF8;
+    --grid:#D7E3ED;
+    --ink:#1F2A37;
+    --ink-soft:#5B6674;
+    --red:#C81D25;
+    --red-soft:#F4D9DA;
+    --green:#1E7A46;
+    --green-soft:#DCEEE1;
+    --amber:#B9770E;
+    --amber-soft:#FBEBD3;
+    --card:#FFFFFF;
+    --line:#E3E0D4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/100% 28px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/28px 100%,
+      var(--paper);
+    background-attachment:local;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding:32px 20px 60px;
+  }
+  .wrap{max-width:680px;margin:0 auto;}
+  header{margin-bottom:22px;}
+  h1{
+    font-family:'Kalam',cursive;
+    font-size:30px;
+    color:var(--red);
+    margin:0;
+    transform:rotate(-1deg);
+  }
+  .sub{color:var(--ink-soft);font-size:14px;margin-top:4px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px 24px;
+    margin-bottom:18px;
+  }
+  .card h2{font-size:17px;margin:0 0 12px;font-weight:600;}
+  label{font-size:13px;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  input[type=text]{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:15px;
+    font-family:'Inter',sans-serif;
+    background:#fff;
+  }
+  input[type=text]:focus{outline:2px solid var(--red-soft);border-color:var(--red);}
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:10px 20px;
+    border-radius:8px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:#fff;
+    cursor:pointer;
+  }
+  .btn:hover{background:#374151;}
+  .btn.secondary{background:#fff;color:var(--ink);border-color:var(--line);}
+  .btn.secondary:hover{background:#f3f2ee;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .q-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:50%;
+    background:var(--ink);color:#fff;font-size:12px;font-weight:700;
+    margin-right:8px;flex:none;
+  }
+  .q-prompt{font-weight:600;font-size:15px;margin-bottom:10px;display:flex;align-items:center;}
+  .options{display:flex;flex-direction:column;gap:8px;margin-left:30px;}
+  .option{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+    cursor:pointer;font-size:14px;
+  }
+  .option:hover{background:#FAFAF5;}
+  .option.selected{border-color:var(--red);background:var(--red-soft);}
+  .option input{margin:0;}
+  .divider{border:none;border-top:1px solid #F0EEE6;margin:18px 0;}
+  .stamp{
+    font-family:'Kalam',cursive;
+    font-size:22px;
+    color:var(--red);
+    border:2px solid var(--red);
+    border-radius:8px;
+    padding:8px 18px;
+    display:inline-block;
+    transform:rotate(-3deg);
+    margin-top:6px;
+  }
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--ink-soft);padding:8px 10px;border-bottom:2px solid var(--ink);
+  }
+  td{padding:9px 10px;border-bottom:1px solid #EFEDE5;}
+  .score{font-weight:700;}
+  .score.good{color:var(--green);}
+  .score.bad{color:var(--red);}
+  .empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:14px;}
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+// ======================= НАЛАШТУВАННЯ ЛЕКЦІЇ =======================
+// Змінюйте тільки цей блок перед кожною новою лекцією.
+
+const LECTURE_TITLE = "Лекція HTML";
+
+const QUESTIONS = [
+  {
+    prompt: "Який редактор призначений для безпосередньо для редагування html-сторінки",
+    options: ["Power Query", "Power BI", "Notepad++", "Figma"],
+    correctIndex: 2
+  },
+  {
+    prompt: "Який тег відповідає за зображення на сторінці?",
+    options: ["li", "img", "body", "title"],
+    correctIndex: 1
+  },
+  {
+    prompt: "Назва сторінки у вікні браузера визначається тегом...",
+    options: ["h1", "name", "ul", "title"],
+    correctIndex: 3
+  },
+  {
+    prompt: "Чи може тег не мати атрибутів?",
+    options: [
+      "Так",
+      "Ні",
+          ],
+    correctIndex: 1
+  },
+  {
+    prompt: "Яким тегом позначаються посилання?",
+    options: [
+      "href",
+      "body",
+      "https",
+      "mail"
+    ],
+    correctIndex: 0
+  }
+];
+
+// Той самий backend URL, що й у html-homework-checker.html.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwV-7uv0mb15o2c3wFyFlG6RHiPoYqLOgTXXHA2bg8620b4SwQh8kljiqajZYDwSgeD/exec';
+
+// Пароль для перегляду результатів викладачем.
+const TEACHER_PASSCODE = 'вчитель2026';
+
+// ===================== КІНЕЦЬ БЛОКУ НАЛАШТУВАНЬ =====================
+
+function hashCode(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) | 0; }
+  return Math.abs(h);
+}
+function slugify(str){
+  return str.trim().toLowerCase().replace(/[^a-zа-яіїєґ0-9]+/gi,'-').replace(/(^-|-$)/g,'') || 'student';
+}
+function backendConfigured(){
+  return APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf('ВСТАВТЕ') === -1;
+}
+function teacherModeRequested(){
+  const params = new URLSearchParams(location.search);
+  return params.has('admin');
+}
+
+let state = {
+  studentName: '',
+  studentId: '',
+  answers: new Array(QUESTIONS.length).fill(null),
+  submitted: false,
+  score: 0,
+  teacherUnlocked: false,
+  teacherRows: []
+};
+
+function el(html){
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+
+async function submitQuiz(record){
+  if(!backendConfigured()) return false;
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(record)
+    });
+    const data = await res.json();
+    return !!data.ok;
+  }catch(e){
+    console.error('submit error', e);
+    return false;
+  }
+}
+
+async function loadQuizAnswers(){
+  if(!backendConfigured()) return [];
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + '?kind=quiz', {cache:'no-store'});
+    const rows = await res.json();
+    return rows.filter(r => r.lecture === LECTURE_TITLE)
+               .sort((a,b)=> (b.submittedAt||0) - (a.submittedAt||0));
+  }catch(e){
+    console.error('load error', e);
+    return [];
+  }
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  if(!backendConfigured()){
+    app.appendChild(el(`
+      <div class="card" style="border:1px solid var(--red);background:var(--red-soft);">
+        <b style="color:var(--red);">Бекенд не налаштовано.</b>
+        Відкрийте цей файл і замініть <code>APPS_SCRIPT_URL</code> на адресу
+        вашого опублікованого Google Apps Script Web App.
+      </div>
+    `));
+  }
+
+  app.appendChild(el(`
+    <header>
+      <h1>${LECTURE_TITLE} — швидке опитування</h1>
+      <div class="sub">${QUESTIONS.length} питань · відповідай самостійно</div>
+    </header>
+  `));
+
+  const section = document.createElement('section');
+  app.appendChild(section);
+
+  if(teacherModeRequested()){
+    renderTeacher(section);
+  }else{
+    renderStudent(section);
+  }
+}
+
+function renderStudent(section){
+  if(!state.studentName){
+    section.appendChild(el(`
+      <div class="card">
+        <h2>Представся</h2>
+        <label for="name-input">Ім'я та прізвище</label>
+        <input type="text" id="name-input" placeholder="Наприклад: Анна Соколенко" />
+        <div style="margin-top:14px;">
+          <button class="btn" id="start-btn">Почати опитування</button>
+        </div>
+      </div>
+    `));
+    section.querySelector('#start-btn').addEventListener('click', ()=>{
+      const name = section.querySelector('#name-input').value.trim();
+      if(!name){
+        section.querySelector('#name-input').style.borderColor = 'var(--red)';
+        return;
+      }
+      state.studentName = name;
+      state.studentId = slugify(name);
+      render();
+    });
+    section.querySelector('#name-input').addEventListener('keydown', e=>{
+      if(e.key==='Enter') section.querySelector('#start-btn').click();
+    });
+    return;
+  }
+
+  if(state.submitted){
+    section.appendChild(el(`
+      <div class="card">
+        <h2>Дякую, ${state.studentName}!</h2>
+        <p>Відповідь зараховано.</p>
+        <div class="stamp">Результат: ${state.score}/${QUESTIONS.length}</div>
+      </div>
+    `));
+    return;
+  }
+
+  const quizCard = el(`<div class="card"></div>`);
+  QUESTIONS.forEach((q, qi)=>{
+    quizCard.appendChild(el(`
+      <div class="q-prompt"><span class="q-num">${qi+1}</span>${q.prompt}</div>
+    `));
+    const optionsWrap = el(`<div class="options"></div>`);
+    q.options.forEach((opt, oi)=>{
+      const optEl = el(`
+        <label class="option">
+          <input type="radio" name="q${qi}" value="${oi}">
+          <span>${opt}</span>
+        </label>
+      `);
+      optEl.querySelector('input').addEventListener('change', ()=>{
+        state.answers[qi] = oi;
+        optionsWrap.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+        optEl.classList.add('selected');
+      });
+      optionsWrap.appendChild(optEl);
+    });
+    quizCard.appendChild(optionsWrap);
+    if(qi < QUESTIONS.length - 1){
+      quizCard.appendChild(el(`<hr class="divider">`));
+    }
+  });
+
+  const submitRow = el(`
+    <div style="margin-top:20px;">
+      <button class="btn" id="submit-quiz-btn">Здати опитування</button>
+      <p class="hint" id="submit-error" style="color:var(--red);"></p>
+    </div>
+  `);
+  quizCard.appendChild(submitRow);
+  section.appendChild(quizCard);
+
+  section.querySelector('#submit-quiz-btn').addEventListener('click', async ()=>{
+    if(state.answers.some(a => a === null)){
+      section.querySelector('#submit-error').textContent = 'Дай відповідь на всі питання перед здачею.';
+      return;
+    }
+    const correctCount = state.answers.reduce((acc, a, i)=> acc + (a === QUESTIONS[i].correctIndex ? 1 : 0), 0);
+    const record = {
+      kind: 'quiz',
+      lecture: LECTURE_TITLE,
+      studentId: state.studentId,
+      studentName: state.studentName,
+      answers: state.answers,
+      correctCount: correctCount,
+      totalQuestions: QUESTIONS.length,
+      submittedAt: Date.now()
+    };
+    const btn = section.querySelector('#submit-quiz-btn');
+    btn.disabled = true;
+    btn.textContent = 'Надсилання…';
+    const ok = await submitQuiz(record);
+    if(ok){
+      state.submitted = true;
+      state.score = correctCount;
+      render();
+    }else{
+      btn.disabled = false;
+      btn.textContent = 'Здати опитування';
+      section.querySelector('#submit-error').textContent = 'Помилка надсилання, спробуй ще раз.';
+    }
+  });
+}
+
+function renderTeacher(section){
+  if(!state.teacherUnlocked){
+    section.appendChild(el(`
+      <div class="card" style="max-width:380px;">
+        <h2>Вхід для викладача</h2>
+        <label for="passcode-input">Пароль</label>
+        <input type="text" id="passcode-input" placeholder="Введіть пароль" />
+        <div style="margin-top:14px;">
+          <button class="btn" id="unlock-btn">Увійти</button>
+        </div>
+        <p class="hint" id="passcode-error" style="color:var(--red);"></p>
+      </div>
+    `));
+    const input = section.querySelector('#passcode-input');
+    const tryUnlock = async ()=>{
+      if(input.value === TEACHER_PASSCODE){
+        state.teacherUnlocked = true;
+        state.teacherRows = await loadQuizAnswers();
+        render();
+      }else{
+        section.querySelector('#passcode-error').textContent = 'Невірний пароль';
+        input.style.borderColor = 'var(--red)';
+      }
+    };
+    section.querySelector('#unlock-btn').addEventListener('click', tryUnlock);
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+    return;
+  }
+
+  section.appendChild(el(`
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0;">Відповіді студентів</h2>
+        <span style="flex:1;"></span>
+        <button class="btn secondary" id="refresh-btn">Оновити список</button>
+      </div>
+      <div id="teacher-table-holder"><div class="empty">Завантаження…</div></div>
+    </div>
+  `));
+  section.querySelector('#refresh-btn').addEventListener('click', async ()=>{
+    state.teacherRows = await loadQuizAnswers();
+    renderTeacherTable(section);
+  });
+  renderTeacherTable(section);
+}
+
+function renderTeacherTable(section){
+  const holder = section.querySelector('#teacher-table-holder');
+  if(!holder) return;
+  if(state.teacherRows.length === 0){
+    holder.innerHTML = '';
+    holder.appendChild(el(`<div class="empty">Поки ніхто не відповів. Натисни «Оновити список» під час пари.</div>`));
+    return;
+  }
+  const table = el(`
+    <table>
+      <thead>
+        <tr><th>Студент</th><th>Результат</th><th>Час</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `);
+  const tbody = table.querySelector('tbody');
+  state.teacherRows.forEach(r=>{
+    const good = r.correctCount === r.totalQuestions;
+    const time = r.submittedAt ? new Date(r.submittedAt).toLocaleString('uk-UA') : '—';
+    tbody.appendChild(el(`
+      <tr>
+        <td>${r.studentName}</td>
+        <td class="score ${good?'good':'bad'}">${r.correctCount}/${r.totalQuestions}</td>
+        <td>${time}</td>
+      </tr>
+    `));
+  });
+  holder.innerHTML = '';
+  holder.appendChild(table);
+}
+
+render();
+</script>
+</body>
+</html>
